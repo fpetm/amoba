@@ -9,7 +9,7 @@ on:
       - master
 
 env:
-  CLANG_TIDY_VERSION: "15.0.2"
+  CLANG_TIDY_VERSION: "16"
   VERBOSE: 1
 
 jobs:
@@ -21,10 +21,10 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04
-#          - windows-2022 ## We don't need to build on windows now
+          - windows-2022
         compiler:
-          - llvm-15.0.2 ## LLVM is enough for now TODO expand matrix
-#          - gcc-11
+          - llvm-16
+          - gcc-13
         generator:
           - "Ninja Multi-Config"
         build_type:
@@ -38,16 +38,16 @@ jobs:
         exclude:
           # mingw is determined by this author to be too buggy to support
           - os: windows-2022
-            compiler: gcc-11
+            compiler: gcc-13
 
         include:
           # Add appropriate variables for gcov version required. This will intentionally break
           # if you try to use a compiler that does not have gcov set
-          - compiler: gcc-11
+          - compiler: gcc-13
             gcov_executable: gcov
             enable_ipo: On
 
-          - compiler: llvm-15.0.2
+          - compiler: llvm-16
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
@@ -58,7 +58,7 @@ jobs:
 
           # This exists solely to make sure a non-multiconfig build works
           - os: ubuntu-20.04
-            compiler: gcc-11
+            compiler: gcc-13
             generator: "Unix Makefiles"
             build_type: Debug
             gcov_executable: gcov
@@ -104,7 +104,7 @@ jobs:
 
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -174,8 +174,8 @@ jobs:
           files: |
  
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
           path: |
-            build/
+            build/amoba
