@@ -1,5 +1,5 @@
 #include "amoba.hpp"
 
 int main() {
-  std::cout << "Hello amoba" << std::endl;
+  std::cout << "Hello amoba-" << amoba::cmake::git_short << std::endl;
 }

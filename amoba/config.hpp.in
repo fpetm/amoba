@@ -1,0 +1,7 @@
+#pragma once
+#include <string_view>
+
+namespace amoba::cmake {
+inline constexpr std::string_view git_hash = "@GIT_HASH@";
+inline constexpr std::string_view git_short = "@GIT_HASH@";
+} // namespace amoba::cmake
