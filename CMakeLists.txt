@@ -40,6 +40,7 @@ add_custom_target(AlwaysCheckGit COMMAND ${CMAKE_COMMAND}
     BYPRODUCTS ${post_configure_file})
 
 add_subdirectory(extern)
+add_subdirectory(libamoba)
 add_subdirectory(amoba)
 
 if(NOT PROJECT_IS_TOP_LEVEL)
