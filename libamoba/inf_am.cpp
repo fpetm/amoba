@@ -82,8 +82,10 @@ int64_t Chunk::index_from_abs_pos(const Position pos) const {
 }
 
 color_t &Board::at(const Position pos) {
-  if (m_Size < pos) {
-    throw std::out_of_range("");
+  if (m_Infinite == false) {
+    if (m_Size < pos) {
+      throw std::out_of_range("");
+    }
   }
 
   for (auto &chunk : m_Chunks) {

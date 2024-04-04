@@ -10,7 +10,7 @@ typedef struct am_inf_am_parameters {
 } am_inf_am_parameters;
 
 typedef struct am_inf_am_position {
-  uint64_t component[4];
+  int64_t component[4];
   uint8_t dimension;
 } am_inf_am_position;
 

@@ -1,6 +1,7 @@
 # amoba
 
 [![ci](https://github.com/fpetm/amoba/actions/workflows/ci.yml/badge.svg)](https://github.com/fpetm/amoba/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/fpetm/amoba/graph/badge.svg?token=LSTN9SFDL7)](https://codecov.io/gh/fpetm/amoba)
 
 ## Build instructions
 
