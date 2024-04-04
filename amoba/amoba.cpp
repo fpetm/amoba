@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <vector>
 
-constexpr uint8_t g_Dimension = 3;
+constexpr uint8_t g_Dimension = 2;
 constexpr uint64_t g_Win = 3, g_ChunkSize = 32;
 
 int main() {
   am_amoba amoba = am_amoba_list[0];
-  am_inf_am_parameters params = {g_Win, g_ChunkSize, g_Dimension};
+  am_inf_am_parameters params = {g_Win, g_ChunkSize, g_Dimension, {3, 3}};
   amoba.init_fun(&amoba, &params);
   while (true) {
     std::cout << "P> ";

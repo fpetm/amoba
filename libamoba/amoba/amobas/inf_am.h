@@ -6,6 +6,7 @@ typedef struct am_inf_am_parameters {
   uint64_t win_n;
   uint64_t chunk_size;
   uint8_t dimension;
+  uint64_t max_sizes[4];
 } am_inf_am_parameters;
 
 typedef struct am_inf_am_position {
