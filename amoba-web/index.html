@@ -2,12 +2,34 @@
 <html>
   <head>
     <title>Test website</title>
+      <style>
+          table, th, td {
+              border: 1px solid black;
+              border-collapse: collapse;
+          }
+      </style>
   </head>
   <body>
-    <input type="number" id="color">
-    <input type="number" id="x">
-    <input type="number" id="y">
-    <input type="button" id="send" value="send">
-    <script src="script.js"></script>
+      <p id="login">
+          <span>Name: </span>
+      <input type="text" />
+      </p>
+      <input type="number" id="color">
+      <input type="number" id="x">
+      <input type="number" id="y">
+      <input type="button" id="send" value="send">
+
+      <table id="history">
+          <thead>
+              <tr>
+                  <th>color</th>
+                  <th>x</th>
+                  <th>y</th>
+              </tr>
+          </thead>
+          <tbody>
+          </tbody>
+      </table>
+      <script src="script.js"></script>
   </body>
 </html>

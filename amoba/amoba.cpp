@@ -47,7 +47,8 @@ void am_server::on_close(am_server *server, websocketpp::connection_hdl hdl) {
 }
 
 void am_server::process_messages() {
-  for (;;) {
+  bool won = false;
+  for (;!won;) {
     std::unique_lock<std::mutex> lock(m_ActionLock);
     while (m_Actions.empty()) {
       m_ActionCondition.wait(lock);
@@ -67,38 +68,58 @@ void am_server::process_messages() {
                         }
         break;
       case MESSAGE: {
-        std::lock_guard<std::mutex> guard(m_ConnectionLock);
-        auto msg = a.msg;
-        nlohmann::json j = nlohmann::json::parse(msg->get_payload());
-        WSPacket data(j);
-        std::cout << data << std::endl;
+          std::lock_guard<std::mutex> guard(m_ConnectionLock);
+          auto msg = a.msg;
+          nlohmann::json j = nlohmann::json::parse(msg->get_payload());
+          if (j["type"] == "place") {
+              ws::PlacePacket data; data.from_json(j);
+              std::cout << data << std::endl;
 
-        std::vector<int64_t> position = data.position;
-        color_t color = data.color;
+              std::vector<int64_t> position = data.position;
+              color_t color = m_PlayerMap[a.hdl]->id;
 
-        am_inf_am_position ampos;
-        ampos.dimension = g_Dimension;
-        for (uint8_t i = 0; i < g_Dimension; i++) {
-          ampos.component[i] = position[i];
-        }
+              am_inf_am_position ampos;
+              ampos.dimension = g_Dimension;
+              for (uint8_t i = 0; i < g_Dimension; i++) {
+                  ampos.component[i] = position[i];
+              }
 
-        amoba.set_fun(&amoba, color, &ampos);
+              amoba.set_fun(&amoba, color, &ampos);
 
-        color_t win = amoba.check_fun(&amoba, &ampos);
-        if (win) {
-          std::cout << win << " has won! Goodbye!" << std::endl;
-          WSPacket p({}, win);
-          nlohmann::json j; p.to_json(j);
-          std::string s = j.dump();
-          std::cout << s << std::endl;
-          for (auto connection : m_Connections) {
-            m_Endpoint.send(connection, s, websocketpp::frame::opcode::text);
+              color_t win = amoba.check_fun(&amoba, &ampos);
+              if (win) {
+                  std::cout << m_PlayerMap[a.hdl]->name << " has won! Goodbye!" << std::endl;
+                  won = true;
+                  ws::PlacePacket p({}, win);
+                  nlohmann::json j; p.to_json(j);
+                  std::string s = j.dump();
+                  std::cout << s << std::endl;
+                  for (auto connection : m_Connections) {
+                      m_Endpoint.send(connection, s, websocketpp::frame::opcode::text);
+                  }
+              }
+              else {
+                  ws::PlacePacket p(position, color);
+                  nlohmann::json j; p.to_json(j);
+                  std::string s = j.dump();
+                  std::cout << s << std::endl;
+                  for (auto connection : m_Connections) {
+                      m_Endpoint.send(connection, s, websocketpp::frame::opcode::text);
+                  }
+              }
           }
-        }
-                    }
-        break;
+          else if (j["type"] == "login") {
+              ws::LoginPacket p; p.from_json(j);
+              int id = m_Players.size() + 1;
+              std::shared_ptr<Player> j = std::make_shared<Player>(p.name, id);
+              m_Players.push_back(j);
+              m_PlayerMap[a.hdl] = j;
+          }
+      }
+      break;
     }
   }
+  std::cout << "Goodbye!" << std::endl;
 }
 int main() {
   am_server serv;

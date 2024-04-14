@@ -53,4 +53,5 @@ TEST_CASE( "Infinite amoba board", "[inf_am]") {
     amoba.set_fun(&amoba, y, &p);
     REQUIRE(amoba.get_fun(&amoba, &p) == y);
   }
+  amoba.destroy_fun(&amoba, NULL);
 }

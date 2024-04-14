@@ -8,6 +8,7 @@
 #include <set>
 #include <queue>
 
+#include <string>
 #include <cstdint>
 #include <vector>
 
@@ -16,27 +17,54 @@ constexpr uint64_t g_Win = 3, g_ChunkSize = 32;
 
 typedef websocketpp::server<websocketpp::config::asio> server;
 
-class WSPacket {
-  public:
-    std::vector<int64_t> position;
-    int64_t color;
-  public:
-    WSPacket(std::vector<int64_t> p, int64_t c) : position(p), color(c) {}
-    WSPacket(nlohmann::json j) {
-      j.at("position").get_to(this->position);      
-      j.at("color").get_to(this->color);
+namespace ws {
+    enum PacketType {
+        Login, Place
     };
-    void to_json(nlohmann::json& j) {
-      j = nlohmann::json{{"position" , position}, {"color" , color}};
-    }
+    class Packet {
+    public:
+        PacketType type;
+        virtual void from_json(nlohmann::json j) = 0;
+        virtual void to_json(nlohmann::json& j) = 0;
+        Packet(nlohmann::json j) { from_json(j); }
+        Packet() = default;
+    };
 
-    friend std::ostream& operator<<(std::ostream &os, WSPacket wp) {
-      os << "Color: " << wp.color << " ; Position : [";
-      for (auto p : wp.position) os << p << ", ";
-      os << "]";
-      return os;
-    }
-};
+    class LoginPacket : Packet {
+    public:
+        std::string name;
+    public:
+        void from_json(nlohmann::json j) {
+            j.at("name").get_to(this->name);
+        }
+        void to_json(nlohmann::json& j) {
+            j = nlohmann::json{ {"name" , name} };
+        }
+
+    };
+    class PlacePacket : Packet {
+    public:
+        std::vector<int64_t> position;
+        int64_t color;
+    public:
+        PlacePacket() {};
+        PlacePacket(std::vector<int64_t> p, int64_t c) : position(p), color(c) {}
+        void from_json(nlohmann::json j) {
+            j.at("position").get_to(this->position);
+            j.at("color").get_to(this->color);
+        };
+        void to_json(nlohmann::json& j) {
+            j = nlohmann::json{ {"position" , position}, {"color" , color} };
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, PlacePacket wp) {
+            os << "Color: " << wp.color << " ; Position : [";
+            for (auto p : wp.position) os << p << ", ";
+            os << "]";
+            return os;
+        }
+    };
+}
 
 enum action_type {
     SUBSCRIBE,
@@ -52,6 +80,13 @@ struct am_action {
     action_type type;
     websocketpp::connection_hdl hdl;
     server::message_ptr msg;
+};
+
+class Player {
+public:
+    std::string name;
+    int id;
+    Player(std::string n, int i) : name(n), id(i) {}
 };
 
 class am_server {
@@ -75,5 +110,7 @@ class am_server {
     std::mutex m_ConnectionLock;
     websocketpp::lib::condition_variable m_ActionCondition;
 
+    std::vector<std::shared_ptr<Player>> m_Players;
+    std::unordered_map<websocketpp::connection_hdl, std::shared_ptr<Player>> m_PlayerMap;
     std::queue<am_action> m_Actions;
 };

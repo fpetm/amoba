@@ -70,6 +70,9 @@ struct Board {
     for (uint8_t i = 0; i < m_Dimension; i++)
       m_Size[i] = size[i];
   }
+  ~Board() {
+      clear();
+  }
 
   color_t &at(const Position pos);
   color_t &operator[](const Position pos) { return at(pos); }
